@@ -150,7 +150,7 @@ export default function App() {
                   </div>
                   <div>
                     <p className="text-white font-bold text-sm">Ultra Velocidade</p>
-                    <p className="text-slate-400 text-xs">Planos de até 1 Giga</p>
+                    <p className="text-slate-400 text-xs">100% fibra</p>
                   </div>
                 </div>
               </div>
