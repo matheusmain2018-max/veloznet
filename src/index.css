@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-veloz-dark: #020617;
+  --color-veloz-accent: #e11d48;
+  --color-veloz-blue: #2563eb;
+  --color-veloz-light: #f8fafc;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-veloz-dark);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-veloz-blue);
+    border-radius: 5px;
+    border: 2px solid var(--color-veloz-dark);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-veloz-accent);
+  }
+}
