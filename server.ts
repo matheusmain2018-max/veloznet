@@ -3,6 +3,10 @@ import { createServer as createViteServer } from "vite";
 import { Resend } from "resend";
 import path from "path";
 import { fileURLToPath } from "url";
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,48 +14,57 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-// Initialize Resend
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "matheusmain2024@gmail.com";
-
-// API routes
+// Initialize Resend - Move inside the route to ensure it picks up env vars in serverless
 app.post("/api/contact", async (req, res) => {
   const { name, whatsapp, email, message } = req.body;
+
+  // Log for debug (visible in Vercel Logs)
+  console.log("Tentativa de envio de contato:", { name, email });
 
   if (!name || !whatsapp || !email || !message) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
-  if (!resend) {
-    console.warn("RESEND_API_KEY não configurada. Simulando envio de e-mail...");
-    console.log("Dados do contato:", { name, whatsapp, email, message });
-    return res.json({ success: true, message: "Simulação de envio concluída com sucesso (API Key ausente)." });
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error("ERRO: RESEND_API_KEY não encontrada nas variáveis de ambiente!");
+    return res.status(500).json({ error: "Configuração do servidor incompleta (API Key ausente)." });
   }
+
+  const resend = new Resend(apiKey);
+  const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "matheusmain2024@gmail.com";
 
   try {
     const { data, error } = await resend.emails.send({
       from: "Veloz Net <onboarding@resend.dev>",
       to: [CONTACT_EMAIL],
-      subject: `Novo Contato do Website: ${name}`,
+      subject: `Novo Contato: ${name}`,
       html: `
-        <h2>Novo contato recebido pelo site</h2>
-        <p><strong>Nome:</strong> ${name}</p>
-        <p><strong>WhatsApp:</strong> ${whatsapp}</p>
-        <p><strong>E-mail:</strong> ${email}</p>
-        <p><strong>Mensagem:</strong></p>
-        <p>${message}</p>
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #0066ff;">Novo contato recebido pelo site</h2>
+          <p><strong>Nome:</strong> ${name}</p>
+          <p><strong>WhatsApp:</strong> ${whatsapp}</p>
+          <p><strong>E-mail:</strong> ${email}</p>
+          <hr />
+          <p><strong>Mensagem:</strong></p>
+          <p style="background: #f4f4f4; padding: 15px; border-radius: 5px;">${message}</p>
+        </div>
       `,
     });
 
     if (error) {
-      console.error("Erro ao enviar e-mail via Resend:", error);
-      return res.status(500).json({ error: "Falha ao enviar e-mail." });
+      console.error("Erro retornado pelo Resend:", error);
+      return res.status(500).json({ 
+        error: `Erro no serviço de e-mail: ${error.message}`,
+        details: error 
+      });
     }
 
+    console.log("E-mail enviado com sucesso:", data);
     res.json({ success: true, data });
   } catch (err) {
-    console.error("Erro inesperado no servidor:", err);
-    res.status(500).json({ error: "Erro interno do servidor." });
+    console.error("Erro fatal no servidor:", err);
+    res.status(500).json({ error: "Erro interno ao processar o envio." });
   }
 });
 

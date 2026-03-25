@@ -51,7 +51,15 @@ export default function App() {
         body: JSON.stringify(formData)
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Resposta não-JSON recebida:", text);
+        throw new Error("A API retornou um erro inesperado (não-JSON).");
+      }
 
       if (response.ok) {
         setStatus({ type: 'success', message: "Mensagem enviada com sucesso! Entraremos em contato em breve." });
@@ -61,7 +69,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Erro ao enviar formulário:", error);
-      setStatus({ type: 'error', message: "Erro de conexão. Tente novamente mais tarde." });
+      setStatus({ type: 'error', message: error instanceof Error ? error.message : "Erro de conexão. Tente novamente mais tarde." });
     } finally {
       setLoading(false);
     }
