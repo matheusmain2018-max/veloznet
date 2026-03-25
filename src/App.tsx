@@ -38,7 +38,13 @@ export default function App() {
   React.useEffect(() => {
     fetch(`${window.location.origin}/api/health`)
       .then(res => res.json())
-      .then(data => setApiStatus(`API OK: ${data.resendConfigured ? "Resend Configurado" : "Simulação"}`))
+      .then(data => {
+        if (data.resendConfigured) {
+          setApiStatus(`API OK: Resend Ativo (${data.targetEmail})`);
+        } else {
+          setApiStatus(`API OK: Modo Simulação (${data.targetEmail})`);
+        }
+      })
       .catch(err => {
         console.error("API Health Check failed:", err);
         setApiStatus("API Indisponível (Erro de Conexão)");
