@@ -33,6 +33,17 @@ export default function App() {
   });
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: "" });
   const [loading, setLoading] = useState(false);
+  const [apiStatus, setApiStatus] = useState<string>("Checking...");
+
+  React.useEffect(() => {
+    fetch(`${window.location.origin}/api/health`)
+      .then(res => res.json())
+      .then(data => setApiStatus(`API OK: ${data.resendConfigured ? "Resend Configurado" : "Simulação"}`))
+      .catch(err => {
+        console.error("API Health Check failed:", err);
+        setApiStatus("API Indisponível (Erro de Conexão)");
+      });
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -45,13 +56,21 @@ export default function App() {
     setStatus({ type: null, message: "" });
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch(`${window.location.origin}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Resposta não-JSON recebida:", text);
+        throw new Error("O servidor retornou uma resposta inválida.");
+      }
 
       if (response.ok) {
         setStatus({ type: 'success', message: "Mensagem enviada com sucesso! Entraremos em contato em breve." });
@@ -61,7 +80,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Erro ao enviar formulário:", error);
-      setStatus({ type: 'error', message: "Erro de conexão. Tente novamente mais tarde." });
+      setStatus({ type: 'error', message: error instanceof Error ? error.message : "Erro de conexão. Tente novamente mais tarde." });
     } finally {
       setLoading(false);
     }
@@ -531,7 +550,14 @@ export default function App() {
               transition={{ duration: 0.6 }}
               className="bg-veloz-light p-8 rounded-[2rem] border border-slate-200"
             >
-              <h3 className="text-xl font-bold text-veloz-dark mb-6">Envie uma mensagem</h3>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-veloz-dark">Envie uma mensagem</h3>
+                <span className={`text-[10px] px-2 py-1 rounded-full font-mono ${
+                  apiStatus.includes("OK") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                }`}>
+                  {apiStatus}
+                </span>
+              </div>
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-4">
                   <input 
