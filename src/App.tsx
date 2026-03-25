@@ -88,8 +88,8 @@ export default function App() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
             <a href="#inicio" className="hover:text-veloz-blue transition-colors">Início</a>
             <a href="#planos" className="hover:text-veloz-blue transition-colors">Planos</a>
-            <a href="#quem-somos" className="hover:text-veloz-blue transition-colors">Quem Somos</a>
             <a href="#servicos" className="hover:text-veloz-blue transition-colors">Serviços</a>
+            <a href="#quem-somos" className="hover:text-veloz-blue transition-colors">Quem Somos</a>
             <a href="#contato" className="hover:text-veloz-blue transition-colors">Contato</a>
           </div>
 
