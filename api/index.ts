@@ -78,20 +78,8 @@ app.post("/api/contact", async (req, res) => {
 });
 
 // For local development
-if (process.env.NODE_ENV !== "production") {
-  const startDevServer = async () => {
-    const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-    const PORT = 3000;
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Dev server running on http://localhost:${PORT}`);
-    });
-  };
-  startDevServer();
-}
+// This part is handled by the dev script in package.json
+// which calls tsx api/index.ts.
+// On Vercel, this file is treated as a serverless function.
 
 export default app;
