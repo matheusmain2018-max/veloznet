@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import { Resend } from "resend";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -66,33 +65,21 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-// Export the app for Vercel
-export default app;
-
-async function startServer() {
-  const PORT = 3000;
-
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+// For local development
+if (process.env.NODE_ENV !== "production") {
+  const startDevServer = async () => {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  // Only listen if not in a serverless environment (Vercel handles listening)
-  if (!process.env.VERCEL) {
+    const PORT = 3000;
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Dev server running on http://localhost:${PORT}`);
     });
-  }
+  };
+  startDevServer();
 }
 
-startServer();
+export default app;
