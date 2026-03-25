@@ -13,11 +13,16 @@ app.use(express.json());
 
 // Initialize Resend
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "matheusmain2024@gmail.com";
+const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "matheusmain2018@gmail.com";
 
 // Health check route
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", resendConfigured: !!resend });
+  res.json({ 
+    status: "ok", 
+    resendConfigured: !!resend,
+    environment: process.env.NODE_ENV || "development",
+    targetEmail: CONTACT_EMAIL
+  });
 });
 
 // API routes
