@@ -12,7 +12,14 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Resend
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resendKey = process.env.RESEND_API_KEY;
+if (!resendKey) {
+  console.error("CRITICAL: RESEND_API_KEY is missing from process.env!");
+} else {
+  console.log("RESEND_API_KEY found (starts with:", resendKey.substring(0, 5), "...)");
+}
+
+const resend = resendKey ? new Resend(resendKey) : null;
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || "matheusmain2024@gmail.com";
 
 // Health check route
