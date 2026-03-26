@@ -33,23 +33,6 @@ export default function App() {
   });
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: "" });
   const [loading, setLoading] = useState(false);
-  const [apiStatus, setApiStatus] = useState<string>("Checking...");
-
-  React.useEffect(() => {
-    fetch(`${window.location.origin}/api/health`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.resendConfigured) {
-          setApiStatus(`API OK: Resend Ativo (${data.targetEmail})`);
-        } else {
-          setApiStatus(`API OK: Modo Simulação (${data.targetEmail})`);
-        }
-      })
-      .catch(err => {
-        console.error("API Health Check failed:", err);
-        setApiStatus("API Indisponível (Erro de Conexão)");
-      });
-  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -558,11 +541,6 @@ export default function App() {
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-veloz-dark">Envie uma mensagem</h3>
-                <span className={`text-[10px] px-2 py-1 rounded-full font-mono ${
-                  apiStatus.includes("OK") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                }`}>
-                  {apiStatus}
-                </span>
               </div>
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-4">
